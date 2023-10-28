@@ -4,43 +4,47 @@ public class Program
 {
     public static void Main()
     {
-        C300_PPO c300System = new C300_PPO(60);
-        D200_PPO d200System = new D200_PPO(40);
+        int N = 5; // Загальна кількість ворожих цілей для збиття
+
+        C300_PPO c300System = new C300_PPO(N); // probability буде 60 за умовчуванням
+        D200_PPO d200System = new D200_PPO(N); // probability буде 40 за умовчуванням
 
         c300System.Fire();
         d200System.Fire();
 
+        c300System.PrintTargetStatistics();
+        d200System.PrintTargetStatistics();
     }
 }
 
-public class C300_PPO  : PPO_system
+public class C300_PPO : PPO_system
 {
-    public C300_PPO (int probability) : base(60)
+    public C300_PPO(int totalTargets) : base(60, totalTargets, "C300_PPO")
     {
     }
 }
 
-public class D200_PPO  : PPO_system
+public class D200_PPO : PPO_system
 {
-    public D200_PPO (int probability) : base(40)
+    public D200_PPO(int totalTargets) : base(40, totalTargets, "D200_PPO")
     {
     }
 }
 
 public abstract class PPO_system
 {
-    private int probability; // Ймовірність збити ворожу ціль (%)
-    public delegate void TargetHitEventHandler(object sender, EventArgs e); // делегат для обробки подій
-    public event TargetHitEventHandler TargetHit; // Подія для "ціль збито"
-    public event TargetHitEventHandler TargetMissed; // Подія для "ціль не збито"
+    private int probability;
+    public int TotalTargets { get; set; } // Загальна кількість цілей для збиття
+    private int targetsHit; // кількість збитих цілей
+    private int targetsMissed; // кількість не збитих цілей
 
+    public string SystemName { get; }
 
     public int Probability_Shoot
     {
         get { return probability; }
         set
         {
-            // Перевірка, щоб значення було в діапазоні від 1 до 100
             if (value >= 1 && value <= 100)
             {
                 probability = value;
@@ -50,39 +54,74 @@ public abstract class PPO_system
                 throw new ArgumentOutOfRangeException("Ймовірність має бути в діапазоні від 1 до 100.");
             }
         }
+
     }
 
-    // Конструктор для ініціалізації ймовірності
-    public PPO_system(int probability)
+    public PPO_system(int probability, int totalTargets, string systemName)
     {
-        Probability_Shoot = probability; // визначаємо початковий % ймовирності попадання у ворожу ціль
+        Probability_Shoot = probability;
+        TotalTargets = totalTargets;
+        SystemName = systemName;
     }
+
+    // Оголошення подій
+    public event TargetHitEventHandler? TargetHit;
+    public event TargetHitEventHandler? TargetMissed;
+
+    public delegate void TargetHitEventHandler(object sender, TargetHitEventArgs e);
 
     public virtual void Fire()
     {
-        // Використовуємо випадковий генератор для генерації випадкового числа від 1 до 100
         Random random = new Random();
-        int randomValue = random.Next(1, 101);
 
-        if (randomValue <= Probability_Shoot)
+        for (int i = 0; i < TotalTargets; i++)
         {
-            Console.WriteLine("Ціль збито системою ППО.");
-            OnTargetHit();
-        }
-        else
-        {
-            Console.WriteLine("Ціль не було збито системою ППО.");
-            OnTargetMissed();
+            if (targetsHit >= TotalTargets)
+            {
+                // Всі цілі вже збиті, виходимо з циклу
+                break;
+            }
+
+            int randomValue = random.Next(1, 101);
+
+            if (randomValue <= Probability_Shoot)
+            {
+                OnTargetHit("Ціль збито системою ППО.");
+                targetsHit++; // Збільшуємо лічильник збитих цілей
+            }
+            else
+            {
+                OnTargetMissed("Ціль не було збито системою ППО.");
+                targetsMissed++; // Збільшуємо лічильник не збитих цілей
+            }
         }
     }
 
-    protected virtual void OnTargetHit()
+    protected virtual void OnTargetHit(string message)
     {
-        TargetHit?.Invoke(this, EventArgs.Empty);
+        TargetHit?.Invoke(this, new TargetHitEventArgs(message, SystemName));
     }
 
-    protected virtual void OnTargetMissed()
+    protected virtual void OnTargetMissed(string message)
     {
-        TargetMissed?.Invoke(this, EventArgs.Empty);
+        TargetMissed?.Invoke(this, new TargetHitEventArgs(message, SystemName));
+    }
+
+    public void PrintTargetStatistics()
+    {
+        Console.WriteLine($"Збито цілей {SystemName}: {targetsHit}");
+        Console.WriteLine($"Не збито цілей {SystemName}: {targetsMissed}");
+    }
+}
+
+public class TargetHitEventArgs : EventArgs
+{
+    public string Message { get; }
+    public string SystemName { get; }
+
+    public TargetHitEventArgs(string message, string systemName)
+    {
+        Message = message;
+        SystemName = systemName;
     }
 }
