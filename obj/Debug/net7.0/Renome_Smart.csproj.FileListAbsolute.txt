@@ -1,0 +1,14 @@
+/Users/a12/Renome_Smart/Renome_Smart/bin/Debug/net7.0/Renome_Smart
+/Users/a12/Renome_Smart/Renome_Smart/bin/Debug/net7.0/Renome_Smart.deps.json
+/Users/a12/Renome_Smart/Renome_Smart/bin/Debug/net7.0/Renome_Smart.runtimeconfig.json
+/Users/a12/Renome_Smart/Renome_Smart/bin/Debug/net7.0/Renome_Smart.dll
+/Users/a12/Renome_Smart/Renome_Smart/bin/Debug/net7.0/Renome_Smart.pdb
+/Users/a12/Renome_Smart/Renome_Smart/obj/Debug/net7.0/Renome_Smart.GeneratedMSBuildEditorConfig.editorconfig
+/Users/a12/Renome_Smart/Renome_Smart/obj/Debug/net7.0/Renome_Smart.AssemblyInfoInputs.cache
+/Users/a12/Renome_Smart/Renome_Smart/obj/Debug/net7.0/Renome_Smart.AssemblyInfo.cs
+/Users/a12/Renome_Smart/Renome_Smart/obj/Debug/net7.0/Renome_Smart.csproj.CoreCompileInputs.cache
+/Users/a12/Renome_Smart/Renome_Smart/obj/Debug/net7.0/Renome_Smart.dll
+/Users/a12/Renome_Smart/Renome_Smart/obj/Debug/net7.0/refint/Renome_Smart.dll
+/Users/a12/Renome_Smart/Renome_Smart/obj/Debug/net7.0/Renome_Smart.pdb
+/Users/a12/Renome_Smart/Renome_Smart/obj/Debug/net7.0/Renome_Smart.genruntimeconfig.cache
+/Users/a12/Renome_Smart/Renome_Smart/obj/Debug/net7.0/ref/Renome_Smart.dll
