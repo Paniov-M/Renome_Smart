@@ -4,16 +4,23 @@ public class Program
 {
     public static void Main()
     {
-        int N = 5; // Загальна кількість ворожих цілей для збиття
+        int totalTargets = 5; // Загальна кількість ворожих цілей для збиття
 
-        C300_PPO c300System = new C300_PPO(N); // probability буде 60 за умовчуванням
-        D200_PPO d200System = new D200_PPO(N); // probability буде 40 за умовчуванням
+        // Створюємо системи ППО з певними ймовірностями і загальною кількістю цілей
+        C300_PPO c300System = new C300_PPO(totalTargets);
+        D200_PPO d200System = new D200_PPO(totalTargets);
 
+        // Виконуємо говоловний метод, де виконуються події збиття ворожих цілей і обчислення кількості збитих і не збитих
         c300System.Fire();
         d200System.Fire();
 
-        c300System.PrintTargetStatistics();
-        d200System.PrintTargetStatistics();
+        // Виводимо статистику про те, скільки кожна система збила цілей
+        Console.WriteLine($"Збито цілей {c300System.SystemName}: {c300System.TargetsHit}");
+        Console.WriteLine($"Збито цілей {d200System.SystemName}: {d200System.TargetsHit}");
+
+        // Обчислюємо, скільки цілей разом не було збито
+        int targetsMissed = totalTargets - c300System.TargetsHit - d200System.TargetsHit;
+        Console.WriteLine($"Не збито цілей разом: {targetsMissed}");
     }
 }
 
@@ -31,14 +38,20 @@ public class D200_PPO : PPO_system
     }
 }
 
-public abstract class PPO_system
+public class PPO_system
 {
-    private int probability;
-    public int TotalTargets { get; set; } // Загальна кількість цілей для збиття
-    private int targetsHit; // кількість збитих цілей
-    private int targetsMissed; // кількість не збитих цілей
+    private int probability; // Ймовірність збиття цілі при пострілі (від 1 до 100)
+    private int availableTargets; // Доступна кількість цілей для обох систем
+    private int targetsHit; // Лічильник збитих цілей
+    private int targetsMissed; // Лічильник не збитих цілей
 
-    public string SystemName { get; }
+    public string SystemName { get; } // Назва системи ППО
+
+    // Оголошення подій для збитих і не збитих цілей
+    public event TargetHitEventHandler? TargetHit;
+    public event TargetHitEventHandler? TargetMissed;
+
+    public delegate void TargetHitEventHandler(object sender, TargetHitEventArgs e);
 
     public int Probability_Shoot
     {
@@ -57,67 +70,59 @@ public abstract class PPO_system
 
     }
 
+    // Конструктор для створення системи ППО з певною ймовірністю, загальною кількістю цілей та назвою
     public PPO_system(int probability, int totalTargets, string systemName)
     {
         Probability_Shoot = probability;
-        TotalTargets = totalTargets;
+        availableTargets = totalTargets;
         SystemName = systemName;
     }
 
-    // Оголошення подій
-    public event TargetHitEventHandler? TargetHit;
-    public event TargetHitEventHandler? TargetMissed;
+    // Властивість для доступу до лічильника збитих цілей
+    public int TargetsHit => targetsHit;
 
-    public delegate void TargetHitEventHandler(object sender, TargetHitEventArgs e);
-
-    public virtual void Fire()
+    // Метод для обчислення збитих/не збитих цілей системою ППО
+    public void Fire()
     {
-        Random random = new Random();
+        Random random = new Random(); 
 
-        for (int i = 0; i < TotalTargets; i++)
+        for (int i = 0; i < availableTargets; i++)
         {
-            if (targetsHit >= TotalTargets)
-            {
-                // Всі цілі вже збиті, виходимо з циклу
-                break;
-            }
+            int randomValue = random.Next(1, 101); // ціль буде мати значення від 1 до 100
 
-            int randomValue = random.Next(1, 101);
-
-            if (randomValue <= Probability_Shoot)
+            if (randomValue <= Probability_Shoot) // якщо значення ворожої цілі менше ніж ймовірність збиття системою ППО 
             {
-                OnTargetHit("Ціль збито системою ППО.");
+                OnTargetHit("Ціль збито системою ППО."); // Подія - ціль збита
                 targetsHit++; // Збільшуємо лічильник збитих цілей
+                availableTargets--; // Зменшуємо кількість доступних цілей
             }
             else
             {
-                OnTargetMissed("Ціль не було збито системою ППО.");
+                OnTargetMissed("Ціль не було збито системою ППО."); //Подія - ціль не збита
                 targetsMissed++; // Збільшуємо лічильник не збитих цілей
             }
         }
     }
 
+    // Метод для запуску події, коли ціль збито
     protected virtual void OnTargetHit(string message)
     {
         TargetHit?.Invoke(this, new TargetHitEventArgs(message, SystemName));
     }
 
+    // Метод для запуску події, коли ціль не було збито
     protected virtual void OnTargetMissed(string message)
     {
         TargetMissed?.Invoke(this, new TargetHitEventArgs(message, SystemName));
     }
-
-    public void PrintTargetStatistics()
-    {
-        Console.WriteLine($"Збито цілей {SystemName}: {targetsHit}");
-        Console.WriteLine($"Не збито цілей {SystemName}: {targetsMissed}");
-    }
 }
 
+
+//Метод для передачі додаткової інформації під час сповіщення про події
 public class TargetHitEventArgs : EventArgs
 {
-    public string Message { get; }
-    public string SystemName { get; }
+    public string Message { get; } // Повідомлення про результат (ціль збито чи не збито)
+    public string SystemName { get; } // Назва системи ППО
 
     public TargetHitEventArgs(string message, string systemName)
     {
