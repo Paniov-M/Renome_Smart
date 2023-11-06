@@ -38,7 +38,7 @@ public class D200_PPO : PPO_system
     }
 }
 
-public class PPO_system
+public abstract class PPO_system
 {
     private int probability; // Ймовірність збиття цілі при пострілі (від 1 до 100)
     private int availableTargets; // Доступна кількість цілей для обох систем
