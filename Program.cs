@@ -24,7 +24,7 @@ public class Program
     }
 }
 
-public class C300_PPO : PPO_system
+public class C300_PPO : PPO_system // Похідні класи в конструкторі яких вказується % ймовірності збиття вородої цілі 
 {
     public C300_PPO(int totalTargets) : base(60, totalTargets, "C300_PPO")
     {
@@ -38,7 +38,7 @@ public class D200_PPO : PPO_system
     }
 }
 
-public abstract class PPO_system
+public abstract class PPO_system //Створюю абстрактний клас "система ППО"
 {
     private int probability; // Ймовірність збиття цілі при пострілі (від 1 до 100)
     private int availableTargets; // Доступна кількість цілей для обох систем
@@ -51,7 +51,7 @@ public abstract class PPO_system
     public event TargetHitEventHandler? TargetHit;
     public event TargetHitEventHandler? TargetMissed;
 
-    public delegate void TargetHitEventHandler(object sender, TargetHitEventArgs e);
+    public delegate void TargetHitEventHandler(object sender, TargetHitEventArgs e); // делегат подій
 
     public int Probability_Shoot
     {
@@ -60,7 +60,7 @@ public abstract class PPO_system
         {
             if (value >= 1 && value <= 100)
             {
-                probability = value;
+                probability = value; // перевірка чи ціль має правильний діапазон
             }
             else
             {
